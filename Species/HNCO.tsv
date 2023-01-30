@@ -1,0 +1,5 @@
+								
+Species	Chemical Name	Ordered Freq (GHz) (rest frame, redshifted)	Resolved QNs	CDMS/JPL Intensity	Lovas/AST Intensity	E_L (cm^-1)	E_L (K)	Linelist
+HNCOv=0	Isocyanic Acid	11.19164000, 11.19164000	37(1,37)-38(0,38)	-6.0947		542.9986	781.2494	CDMS
+HNCOv=0	Isocyanic Acid	13.66602000, 13.66602000	39(0,39)-38(1,38)	-5.9675		571.1038	821.6862	CDMS
+HNCOv=0	Isocyanic Acid	21.98157260, 21.98157260	1(0,1)-0(0,0)	-5.5266	0.04	0	0	CDMS

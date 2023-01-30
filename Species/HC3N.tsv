@@ -1,0 +1,5 @@
+								
+Species	Chemical Name	Ordered Freq (GHz) (rest frame, redshifted)	Resolved QNs	CDMS/JPL Intensity	Lovas/AST Intensity	E_L (cm^-1)	E_L (K)	Linelist
+HC3Nv=0	Cyanoacetylene	9.09811520, 9.09811520	J=1-0	-5.2535	2.11	0	0	CDMS
+HC3Nv=0	Cyanoacetylene	18.19622600, 18.19622600	J=2-1	-4.3513	  b	0.3035	0.4367	CDMS
+HC3Nv=0	Cyanoacetylene	27.29428900, 27.29428900	J=3-2	-3.8246	1.1	0.9104	1.3099	CDMS

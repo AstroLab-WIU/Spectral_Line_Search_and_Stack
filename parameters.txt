@@ -1,0 +1,35 @@
+#### path ####
+path_to_MS =/path/to/ms_data/
+#
+### visibilities ### 
+vis = [vis1.ms,vis2.ms,...]
+field = 0
+#
+### Frequency_File ### 
+molecule = CH3OH.tsv
+#Upper Energy is in Kelvin
+upper_energy=2e4
+#
+#
+### Stacking ### 
+stack_boolean = False
+#
+### cube_gen ### 
+datacolumn= corrected
+specmode=cube 
+#width=30km/s 
+#start=550km/s 
+#outframe=LSRK 
+threshold=0.5mJy   
+imsize=1000
+cell=["0.035arcsec"]  
+niter= 10000 
+deconvolver=hogbom  
+weighting= briggs 
+robust= 0.5 
+pbcor=True  
+pblimit=0.2  
+restoringbeam=common         
+interactive=False
+stokes = I 
+#phasecenter ='J2000 19:28:55.58 17.52.03.11'
