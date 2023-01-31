@@ -31,8 +31,8 @@ def chans_rm_continuum(cube_input):
         #for instance, we could have a bad channel affected by
         #RFI but the negatives and positives compensate, resulting
         #in no flux. Better to use the RMS:
-        lower_lim=rms_mean-rms_std
-        upper_lim=rms_mean+rms_std
+        lower_lim=rms_mean-3*rms_std
+        upper_lim=rms_mean+3*rms_std
 
         print (cube)
         print("RMS Cube:{0:3.3e} ".format(6*a.mean()))
@@ -78,16 +78,8 @@ def chans_rm_continuum(cube_input):
                     chans=i+1
                     array_channel.append(channel_conti)
                     channel_join=','.join(array_channel)
-                    #last=str(chans)+'~'+str(num-1)
         channels_use.append(channel_join)       
-        #print(last)
-    #channels_use.append(channel_join)
-    #print channels_use
     return channels_use
-    #print ("Lower Limit % {0:2f} Upper limit % {1:2f}".format(chan_stats['flux'][0]/lower_lim , chan_stats['flux'][0]/upper_lim))
-    #print  "Channel {0:1d} RMS {1:3.3e} Flux {2:3.3e} ".format(i, chan_stats['rms'][0], chan_stats['flux'][0])
-
-
 
 def stack(cube_input):                
     new_path=cube_input[-1]
@@ -134,8 +126,7 @@ def stack(cube_input):
     for i in range(len(cube_to_stack)):
         imstat_cube.append(imstat(cube_to_stack[i], box='50,50,300,300'))
         a =np.array(imstat_cube[i]['rms'])
-        #print('RMS of '+cube_to_stack[i]+' is %1.2e Jy/b' % a.mean())
-        
+                
     ## Define weights for stacking:
     weight_total = sum(1.0/item['rms']**2 for item in imstat_cube)
     print('Weight normalization factor: ',weight_total)
@@ -167,8 +158,10 @@ def stack(cube_input):
 
 def export_image(img_name):
     img=''
-    path_conti='/data/esanchez/RRL_in_Ionized_Jets_from_Rosero2016_Emmanuel_Sanchez/Rosero_2016_all_data/TAR/Survey_work_images/*'
-    select='/data/esanchez/RRL_in_Ionized_Jets_from_Rosero2016_Emmanuel_Sanchez/Rosero_2016_all_data/TAR/Survey_work_images/IRAS20126_4104/C_band/I20126_9000px_wide_res0.05.pbcor/*'
+    path_conti='/path/to/continuum/sources/*'
+    select='/path/to/cubes/*'
+    levels = []
+    unit = 1e-6
     while True:
         folder=glob.glob(path_conti)
         for i in folder:
@@ -183,11 +176,9 @@ def export_image(img_name):
     if img=='':
         pass
     else:
-        image='stacked_cube2.image' #'spw5-Halpha-H(63)alpha.image'
-        imview(raster={'file':new_path+image,'colorwedge':True} , contour={'file': img, 'levels': [-2,3,4.5,6,7.5,10.5,13] , 'unit':5e-6})
-    
-    #os.chdir('/data/esanchez/RRL_in_Ionized_Jets_from_Rosero2016_Emmanuel_Sanchez/ANALYSIS')
- 
+        image='stacked_cube.image'
+        imview(raster={'file':new_path+image,'colorwedge':True} ,
+               contour={'file': img, 'levels': levels , 'unit':unit}) 
 
 
 def sub_images():
@@ -199,16 +190,21 @@ def sub_images():
             stats=imstat(imagename=new_path+f,  box='50,50,300,300' ,axes=[0,1])
             a =np.array(stats['rms'])
             num_chans=len(a)
-            #print num_chans
-            imsubimage(imagename=new_path+f,outfile=new_path+f+'.sub2',chans='1~'+str(num_chans-1),overwrite=True )
-            #region='centerbox[[307.8deg , 40.0545deg],[1000pix,1000pix]]'chans='1~'+str(num_chans-1)
+            
+            imsubimage(
+                imagename=new_path+f,outfile=new_path+f+'.sub',
+                chans='1~'+str(num_chans-1),
+                overwrite=True )
+            
     os.chdir(path_analysis)
 
 def view_img(image_name):
     global raster
     global contour
     level=[]
-    with open(path_analysis+'/'+'Rosero_Export_Images_K.csv') as image_file:
+    ### Enter the path of your csv/txt file with levels and rms
+    csv_file_path = ''
+    with open(csv_file_path) as image_file:
         Reader=csv.reader(image_file,delimiter=',')
         next(Reader)#Skip the header
         for row in Reader:
@@ -225,8 +221,10 @@ def view_img(image_name):
                     elif '[' not in i and ']' not in i:
                         level.append(float(i))
                 uni=float(row[4])
-    img='/data/esanchez/RRL_in_Ionized_Jets_from_Rosero2016_Emmanuel_Sanchez/ANALYSIS/Output/K_band/stacked_images/'+image_name+'_stacked_cube.image'
-    imview(raster={'file':img,'colorwedge':True} , contour={'file':cont, 'levels': level , 'unit':uni})
+    img='/path/of/stacked_cube.image'
+    imview(
+        raster={'file':img,'colorwedge':True} , 
+        contour={'file':cont, 'levels': level , 'unit':uni})
 
 
 def sub_stacked(image_name):
@@ -234,19 +232,11 @@ def sub_stacked(image_name):
     global outfile
     global region
     global overwrite
-    stack_folder='/data/esanchez/RRL_in_Ionized_Jets_from_Rosero2016_Emmanuel_Sanchez/ANALYSIS/Output/K_band/stacked_images/'
+    stack_folder='/path/to/stacked_images/'
     os.chdir(stack_folder)
-    default(imsubimage)
-    imagename=image_name+'_stacked_cube.image'
-    outfile=imagename+'.sub2'
-    region='regions/'+imagename+'.reg2'
-    overwrite=True 
-    inp(imsubimage)
-    go(imsubimage)
+    imsubimage(
+        imagename=image_name+'_stacked_cube.image',
+        outfile=imagename+'.sub',
+        region='regions/'+imagename+'.reg',
+        overwrite=True )
     os.chdir(path_analysis)
-
-
-#ima_var='IRAS20126_4104K_band'
-#sub_stacked(ima_var)
-#view_img(ima_var)
-    
