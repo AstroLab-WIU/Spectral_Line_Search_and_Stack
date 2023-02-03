@@ -12,14 +12,14 @@ Before running the python program we need to define all the variables inside the
 
 Open the **parameters.txt** and edit each individual variable.
 
-The variables are separete in the following sections: 
+The variables are separated in the following sections: 
 
 * Path:
   - path_to_MS = Reference path of where the *ms* files are storage.
  
 * Visibilities
 
-  - vis = list of visibilities 1 or multiple visibilities e.g [vis1,vis2...] 
+  - vis = list of visibilities 1 or multiple visibilities, e.g [vis1,vis2...] 
   
   - field =  index of the field from (0,1,2....n)
    
@@ -30,7 +30,7 @@ The variables are separete in the following sections:
 
 # Execution
 
-The next step will be run the main script from casa interface using the command
+The next step will be to run the main script from casa interface using the command
 
 ```
 execfile('main_script.py')
@@ -38,13 +38,13 @@ execfile('main_script.py')
 
 ### Imaging generation
 
-The program will use the default  settings for each source that you selected. The output of the images will be located at /Output/'Source Name'
+The program will use the default settings for each source that you selected. The output of the images will be located at /Output/'Source Name'
 
 
 # Splatalogue - Files
 [Splatalogue](https://www.cv.nrao.edu/php/splat/index.php)
 
-After the initial variables you must download the files from Splatalogue and saved it in the 'Species' folder. The file must be download in '.tsv' format following the this two parameters. 
+After the initial variables, you must download the files from Splatalogue and save them in the 'Species' folder. The file must be download in '.tsv' format following these two parameters. 
 Field Separator: Tab
 
 Range: All Records
