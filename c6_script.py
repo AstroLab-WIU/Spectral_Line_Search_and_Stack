@@ -212,7 +212,7 @@ global new_path
 
 def main():
     global mySDM
-    if parameters_dict['Stacking']['seach_bool']:
+    if parameters_dict['Control parameters']['generate_cubes']:
 
         for i in sources:
             mySDM = i
@@ -270,7 +270,7 @@ def main():
             print(images_cube)
         #Stacking detected lines
 
-        if parameters_dict['Stacking']['stack_boolean']==True:
+        if parameters_dict['Control parameters']['stack_cubes']==True:
             temp=[]
             temp2=[]
             for cube in images_cube:

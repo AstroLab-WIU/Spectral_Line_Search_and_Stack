@@ -11,9 +11,9 @@ molecule = CH3OH.tsv
 upper_energy=2e4
 #
 #
-### Stacking ### 
-stack_boolean = False
-search_bool = True
+### Control parameters ### 
+generate_cubes = True
+stack_cubes = False
 #
 ### cube_gen ### 
 datacolumn= corrected
