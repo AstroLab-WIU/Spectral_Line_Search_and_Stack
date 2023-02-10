@@ -5,9 +5,7 @@ import csv
 import sys
 
 
-def chans_rm_continuum(cube_input):
-    new_path=cube_input[-1]
-    del(cube_input[-1])
+def chans_rm_continuum(cube_input,new_path):
     #Stats for each cube
     channels_use=[]
     chans=0
@@ -22,36 +20,18 @@ def chans_rm_continuum(cube_input):
         rms_std=a.std()
         flux_mean=b.mean()
         flux_std= b.std()
-        #lower_lim=flux_mean-flux_std
-        #upper_lim=flux_mean+flux_std
-        # EA: if the goal is to find channels that are OK
-        # for continuum subtraction, and we are making
-        # a 'random' box to decide, it is unclear why
-        # we are using the flux instead of the RMS,
-        #for instance, we could have a bad channel affected by
-        #RFI but the negatives and positives compensate, resulting
-        #in no flux. Better to use the RMS:
         lower_lim=rms_mean-3*rms_std
         upper_lim=rms_mean+3*rms_std
-
-        print (cube)
-        print("RMS Cube:{0:3.3e} ".format(6*a.mean()))
-        print("RMS Cube:{0:3.3e} ".format(b.std()))
-        print( "Mean {0:2.3e} Std {1:2.3e} Lower limit {2:2.3e} Upper Limit {3:2.3e} rms {4:2.3e}".format(flux_mean,flux_std,lower_lim,upper_lim,rms_mean))
+        
+        print( "Mean {0:2.3e} Std { 1:2.3e} Lower limit {2:2.3e} Upper Limit {3:2.3e} rms {4:2.3e}".format(flux_mean,flux_std,lower_lim,upper_lim,rms_mean))
         channel_conti=''
-        #EA: what is the idea of -5 in the next line?
-        #This subtracts -5 to the array of RMS values.
-        #It is not changing the number of elements, it is
-        #unclear why this is done, seems to be not needed here.
-        #num=len(stats['rms']-5)# Number of channels
-        num=len(stats['rms'])# EA:  Number of channels
+        num=len(stats['rms'])
         channel_join = ''
         for i in range(num):
             chan_stats=imstat(imagename=new_path+cube,  box='50,50,300,300',axes=[0,1] ,chans=str(i))
             if len(chan_stats['rms'])==0:
                 pass
                 chans=i+1
-                #print("Empty {}".format(i))
             else:
                 #print("Flux {0:3.3e}".format(chan_stats['flux'][0]))
                 print("Lower Lim {0:2.3e} , Upper Lim {1:2.3e} RMS {2:2.3e}".format(lower_lim,upper_lim,chan_stats['rms'][0]))
@@ -112,6 +92,7 @@ def stack(cube_input):
     #regrid spectrum, to be able to average them.
     cube_to_stack = [cube[0]]
     for i in range(len(cube)-1):
+        print(cube[0],cube[i+1])
         output = imagename +'.imregrid'
         imregrid(
         imagename = cube[i+1]
