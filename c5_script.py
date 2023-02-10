@@ -271,60 +271,60 @@ global new_path
 
 def main():
     global mySDM
-    
-    for i in sources:
-        mySDM = i
-        mySDM_Folder=str(mySDM[0:-3])  
-
-        #Create Folder for the plotms Outputs
+    if parameters_dict['Stacking']['search_bool']:
         
-        try:  
-            new_path=path_analysis+'Output/'+mySDM_Folder
-            os.mkdir(new_path)
-        except OSError:  
-            print ("Creation of the directory %s failed is already created" % new_path)
-        else:  
-            print ("Successfully created the directory %s " % new_path)
+        for i in sources:
+            mySDM = i
+            mySDM_Folder=str(mySDM[0:-3])  
 
-        #Creation of the listobs
-        if not os.path.exists(new_path+'/log.txt'):
-            list(mySDM,new_path)
-    
-        header,foot,f_header,f_foot=lines(new_path)
-        
-        temp=np.genfromtxt(new_path+"/log.txt",skip_header=header,skip_footer=foot,usecols=(0))
+            #Create Folder for the plotms Outputs
 
-        print('Spw to observed ', temp)
-        
-        #Create freq vs amp txt files
+            try:  
+                new_path=path_analysis+'Output/'+mySDM_Folder
+                os.mkdir(new_path)
+            except OSError:  
+                print ("Creation of the directory %s failed is already created" % new_path)
+            else:  
+                print ("Successfully created the directory %s " % new_path)
 
-        plots=glob.glob(new_path+'/*.txt*')
-        if len(plots)<2:
-            ploting(f,temp,new_path)
+            #Creation of the listobs
+            if not os.path.exists(new_path+'/log.txt'):
+                list(mySDM,new_path)
 
-        #Function to find acording to the species
+            header,foot,f_header,f_foot=lines(new_path)
 
-        sel_file= parameters_dict['Frequency_File']['molecule']  #select_file() #'CH3OH.tsv'#'OH.tsv'# 'OH.tsv' 
-        energy_cut = float(parameters_dict['Frequency_File']['upper_energy'])
+            temp=np.genfromtxt(new_path+"/log.txt",skip_header=header,skip_footer=foot,usecols=(0))
 
-        array_spws=create_freq(sel_file,energy_cut,new_path)
-        if array_spws==[]:
-           print("The MS analyzed does not contain any match with the file" ,sel_file)
-           next
-        #Creates a new folder for cubes that are going to be created. 
+            print('Spw to observed ', temp)
 
-        try:  
-            tc_path=path_analysis+'Output/'+mySDM_Folder+'/'+sel_file[:-4]+'/'
-            os.mkdir(tc_path)
-        except OSError:
-            print ("Creation of the directory %s failed is already created" % tc_path)
-        else:  
-            print ("Successfully created the directory %s " % tc_path)
+            #Create freq vs amp txt files
 
+            plots=glob.glob(new_path+'/*.txt*')
+            if len(plots)<2:
+                ploting(f,temp,new_path)
 
-        #Create images of the previous findings 
+            #Function to find acording to the species
 
-        images_cube=create_img(array_spws,f,mySDM,tc_path)
+            sel_file= parameters_dict['Frequency_File']['molecule']  #select_file() #'CH3OH.tsv'#'OH.tsv'# 'OH.tsv' 
+            energy_cut = float(parameters_dict['Frequency_File']['upper_energy'])
+
+            array_spws=create_freq(sel_file,energy_cut,new_path)
+            if array_spws==[]:
+               print("The MS analyzed does not contain any match with the file" ,sel_file)
+               next
+            #Creates a new folder for cubes that are going to be created. 
+
+            try:  
+                tc_path=path_analysis+'Output/'+mySDM_Folder+'/'+sel_file[:-4]+'/'
+                os.mkdir(tc_path)
+            except OSError:
+                print ("Creation of the directory %s failed is already created" % tc_path)
+            else: 
+                print ("Successfully created the directory %s " % tc_path)
+
+            #Create images of the previous findings 
+
+            images_cube=create_img(array_spws,f,mySDM,tc_path)
 
         #Stacking detected lines
 

@@ -13,6 +13,7 @@ upper_energy=2e4
 #
 ### Stacking ### 
 stack_boolean = False
+search_bool = True
 #
 ### cube_gen ### 
 datacolumn= corrected
