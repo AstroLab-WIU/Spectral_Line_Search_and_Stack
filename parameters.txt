@@ -11,11 +11,12 @@ molecule = CH3OH.tsv
 upper_energy=2e4
 #
 #
-### Control parameters ### 
+### Control_Parameters ### 
 generate_cubes = True
 stack_cubes = False
+generate_stats = False
 #
-### cube_gen ### 
+### Cube_Gen ### 
 datacolumn= corrected
 specmode=cube 
 #width=30km/s 

@@ -2,39 +2,46 @@
 
 # Installation and Configuration 
 
-**This version of the program runs in python 2.X and CASA 5.1 or higher**
+1. Download source files using the git command:
 
-The program will be updated for python 3.X and CASA 6.X
+```
+git clone https://github.com/AstroLab-WIU/Spectral_Line_Search_and_Stack.git
+```
 
-Extract the files in the path. 
+This will create the folder Spectral Line Search and Stack containing the Python (.py) scripts and other necessary files to execute the routine.
 
-Before running the python program we need to define all the variables inside the python script. 
-
-Open the **parameters.txt** and edit each individual variable.
-
-The variables are separated in the following sections: 
+ 
+2. Open and edit the file parameters.txt. This file contains multiple parameters that CASA requries to execute each task. The variables are separated in the following sections:
 
 * Path:
-  - path_to_MS = Reference path of where the *ms* files are storage.
+  - path to MS = Reference path of where the visibility (*.ms) files are located.
+
  
 * Visibilities
+   - vis = list of calibrated visibilities: could be one or multiple visibility files, e.g., [?vis1.ms?,?vis2.ms?, ...].
+   - field = ALL or index (ID number) or field/source name, e.g., 2, or ?sourceA?. List of sources can be obtained with the CASA task listobs.
 
-  - vis = list of visibilities 1 or multiple visibilities, e.g [vis1,vis2...] 
-  
-  - field =  index of the field from (0,1,2....n)
-   
 * Frequency Files
-    - molecule = Type the name file with the frequencies
-    - Upper limit of the energy level measure in Kelvin 
- 
+   - molecule = The name of the file that contains the frequencies of interest, e.g., CH3OH.tsv. Frequency files are  in the ./Species/ folder.
+   - upper energy = Upper limit of the energy level measured in Kelvin (i.e., maximum El/kB) to search for lines with energy levels below this limit.
+
+* Control Parameters
+
+  - generate cubes = True, the script will find the SPWs that contain rest frequencies listed in the Frequency File, and create cubes accordingly. 
+  - stack cubes = True, the script will run the stacking algorithm. In this case, the cubes from different spectral lines will be stacked to increase sensitivity
+* Cube_Gen
+  - Parameters of tclean for imaging. [CASA reference](https://casadocs.readthedocs.io/en/stable/api/tt/casatasks.imaging.tclean.html)
+  
 
 # Execution
-
-The next step will be to run the main script from casa interface using the command
-
+3. Execute script in a IPython CASA (version 5.1 or higher) terminal: 
 ```
 execfile('main_script.py')
 ```
+
+4. The script will run multiple routines, execution time will depend on size of the file and workstation capabilities
+
+
 
 ### Imaging generation
 
