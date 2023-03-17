@@ -206,38 +206,29 @@ def create_img(spws,fields,mySDM,new_path):
         default(tclean)
         vis=path+mySDM
         imagename=new_path+spw_to_do 
-        datacolumn=parameters_dict['cube_gen']['datacolumn'] #'corrected'
+        datacolumn=parameters_dict['Cube_Gen']['datacolumn'] #'corrected'
        
         spw=spw_number
         
         field=fields
-        specmode=parameters_dict['cube_gen']['specmode']#'cube'  
+        specmode=parameters_dict['Cube_Gen']['specmode']#'cube'  
         #width='30km/s' 
         restfreq = spw_rest_freq
         #start='550km/s' 
         #outframe='LSRK' 
-        threshold= parameters_dict['cube_gen']['threshold']  #'0.5mJy' # 0.4 '0.05mJy'  
-        imsize= [int(parameters_dict['cube_gen']['imsize'])] # [1000]
-        cell= parameters_dict['cube_gen']['cell'] #['0.035arcsec']  
-        niter=  int(parameters_dict['cube_gen']['niter'])
-        deconvolver=parameters_dict['cube_gen']['deconvolver']#'hogbom'  
-        weighting= parameters_dict['cube_gen']['weighting'].strip() #'briggs' 
-        robust=float(parameters_dict['cube_gen']['robust']) # 0.5 
-        pbcor=bool(parameters_dict['cube_gen']['pbcor']) # True  
-        pblimit=float(parameters_dict['cube_gen']['pblimit']) #0.2  
-        restoringbeam=parameters_dict['cube_gen']['restoringbeam'] #'common' 
+        threshold= parameters_dict['Cube_Gen']['threshold']  #'0.5mJy' # 0.4 '0.05mJy'  
+        imsize= [int(parameters_dict['Cube_Gen']['imsize'])] # [1000]
+        cell= parameters_dict['Cube_Gen']['cell'] #['0.035arcsec']  
+        niter=  int(parameters_dict['Cube_Gen']['niter'])
+        deconvolver=parameters_dict['Cube_Gen']['deconvolver']#'hogbom'  
+        weighting= parameters_dict['Cube_Gen']['weighting'].strip() #'briggs' 
+        robust=float(parameters_dict['Cube_Gen']['robust']) # 0.5 
+        pbcor=bool(parameters_dict['Cube_Gen']['pbcor']) # True  
+        pblimit=float(parameters_dict['Cube_Gen']['pblimit']) #0.2  
+        restoringbeam=parameters_dict['Cube_Gen']['restoringbeam'] #'common' 
         interactive= False
-        stokes=parameters_dict['cube_gen']['stokes'] #'I'
-        #phasecenter =parameters_dict['cube_gen']['phasecenter']
-        #'J2000 19h29m33s +18d00m54s'
-        #'J2000 19:28:55.58 17.52.03.11'
-        #'J2000 19:29:33.52 18.00.54.20'
-        #'J2000 18h21m09s -14d31m48s'
-        #'J2000 19h29m33s +18d00m54s'
-        #'J2000 19h29m33s +18d00m54s'
-        # 19282 'J2000 19h30m23s +18d20m26.0s'
-        #go_img= 'N'#raw_input("Create image Y/N: ")
-        #if '9(2)-9' in spw_to_do:
+        stokes=parameters_dict['Cube_Gen']['stokes'] #'I'
+        #phasecenter =parameters_dict['Cube_Gen']['phasecenter']
         if not os.path.exists(new_path+spw_to_do+'.image'):
             print("Did not Found -> Start Image")
             inp(tclean)
@@ -271,8 +262,7 @@ global new_path
 
 def main():
     global mySDM
-    if parameters_dict['Control parameters']['generate_cubes']:
-        
+    if parameters_dict['Control_Parameters']['generate_cubes']:
         for i in sources:
             mySDM = i
             mySDM_Folder=str(mySDM[0:-3])  
@@ -295,7 +285,7 @@ def main():
 
             temp=np.genfromtxt(new_path+"/log.txt",skip_header=header,skip_footer=foot,usecols=(0))
 
-            print('Spw to observed ', temp)
+            print('Spw to check ', temp)
 
             #Create freq vs amp txt files
 
@@ -309,50 +299,53 @@ def main():
             energy_cut = float(parameters_dict['Frequency_File']['upper_energy'])
 
             array_spws=create_freq(sel_file,energy_cut,new_path)
-            if array_spws==[]:
-               print("The MS analyzed does not contain any match with the file" ,sel_file)
+            if array_spws !=[]:
+                 #Creates a new folder for cubes that are going to be created.
+                tc_path=''
+                try:  
+                    tc_path=path_analysis+'Output/'+mySDM_Folder+'/'+sel_file[:-4]+'/'
+                    os.mkdir(tc_path)
+                except OSError:
+                    print ("Creation of the directory %s failed is already created" % tc_path)
+                else: 
+                    print ("Successfully created the directory %s " % tc_path)
+
+                #Create images of the previous findings 
+
+                images_cube=create_img(array_spws,f,mySDM,tc_path)
+
+            else:
+               print("The MS file does not contain any match with the lines listed in file %s" % sel_file)
                next
-            #Creates a new folder for cubes that are going to be created. 
 
-            try:  
-                tc_path=path_analysis+'Output/'+mySDM_Folder+'/'+sel_file[:-4]+'/'
-                os.mkdir(tc_path)
-            except OSError:
-                print ("Creation of the directory %s failed is already created" % tc_path)
-            else: 
-                print ("Successfully created the directory %s " % tc_path)
-
-            #Create images of the previous findings 
-
-            images_cube=create_img(array_spws,f,mySDM,tc_path)
 
         #Stacking detected lines
 
-        if parameters_dict['Control parameters']['stack_cubes']==True:
-            temp=[]
-            temp2=[]
-            for cube in images_cube:
-                stats=imstat(imagename=tc_path+cube,  box='50,50,300,300', axes=[0,1])
-                if len(stats['rms'])>256:
-                    images_cube.remove(cube)
-                    print('Removed from the stacking %s' %cube)
-                else: 
-                    temp.append(cube[cube.find('(')+1:cube.find(')')])
-                    #temp.append(int(filter(str.isdigit,cube))) 
-            temp.sort(reverse=True)
-            temp=[str(x) for x in temp]
-            for n in temp:
-                for name in images_cube:
-                    if n in name:
-                        temp2.append(name)
-            images_cube=temp2
-            print( images_cube)
-            images_cube.append(tc_path)
-            
-            #Stacking Cubes
-            execfile("stacking_module.py",globals())
-            #print images_cube
-            stack(images_cube)
+    if parameters_dict['Control_Parameters']['stack_cubes']:
+        temp=[]
+        temp2=[]
+        for cube in images_cube:
+            stats=imstat(imagename=tc_path+cube,  box='50,50,300,300', axes=[0,1])
+            if len(stats['rms'])>256:
+                images_cube.remove(cube)
+                print('Removed from the stacking %s' %cube)
+            else: 
+                temp.append(cube[cube.find('(')+1:cube.find(')')])
+                #temp.append(int(filter(str.isdigit,cube))) 
+        temp.sort(reverse=True)
+        temp=[str(x) for x in temp]
+        for n in temp:
+            for name in images_cube:
+                if n in name:
+                    temp2.append(name)
+        images_cube=temp2
+        print( images_cube)
+        images_cube.append(tc_path)
+
+        #Stacking Cubes
+        execfile("stacking_module.py",globals())
+        #print images_cube
+        stack(images_cube)
 
 
 if __name__ == '__main__':
