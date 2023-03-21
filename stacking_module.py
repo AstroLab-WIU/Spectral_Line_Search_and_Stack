@@ -98,19 +98,22 @@ def stack(cube_input,new_path):
     weights = weights/weight_total
     print('Weights: ',weights)
     
-    ## Stack Cubes
+    #Creates the new stacked cube using the previous weights
+
     stacked_image = new_path+'stacked_cube.image'
-    #os.system('rm -r -f '+stacked_image)
+
     ex = '(IM0*'+str(weights[0]) 
     for i in range(len(weights)-1):
         ex = ex + ' + IM'+str(i+1)+'*'+str(weights[i+1])
     ex = ex + ')'
+
+    
     immath(
     imagename = cube_to_stack
     ,mode = 'evalexpr'
     ,outfile = stacked_image
-    ,expr = ex
-    )
+    ,expr = ex )
+    #Print the RMS of all the cubes
     imstat_cube.append(imstat(new_path+'stacked_cube.image', box='50,50,300,300'))
     cube_to_stack.append("stacked_cube.image")
     for i in range(len(imstat_cube)):
