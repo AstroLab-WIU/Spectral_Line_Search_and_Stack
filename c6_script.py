@@ -211,85 +211,68 @@ global new_path
 
 def main():
     global mySDM
-    if parameters_dict['Control_Parameters']['generate_cubes'] and sources != []:
-    
-        for i in sources:
-            mySDM = i
-            mySDM_Folder=str(mySDM[0:-3])  
+    images_cube =[]
+    for i in sources:
+        mySDM = i
+        mySDM_Folder=str(mySDM[0:-3])  
 
-            #Create Folder for the plotms Outputs
+        #Create Folder for the plotms Outputs
 
-            try:  
-                new_path=path_analysis+'Output/'+mySDM_Folder
-                os.mkdir(new_path)
-            except OSError:  
-                print ("Creation of the directory %s failed is already created" % new_path)
-            else:  
-                print ("Successfully created the directory %s " % new_path)
+        try:  
+            new_path=path_analysis+'Output/'+mySDM_Folder
+            os.mkdir(new_path)
+        except OSError:  
+            print ("Creation of the directory %s failed is already created" % new_path)
+        else:  
+            print ("Successfully created the directory %s " % new_path)
 
+        sel_file= parameters_dict['Frequency_File']['molecule']
+        energy_cut = float(parameters_dict['Frequency_File']['upper_energy'])
+
+        #Creates a new folder for cubes that are going to be created. 
+        try:  
+            tc_path=path_analysis+'Output/'+mySDM_Folder+'/'+sel_file[:-4]+'/'
+            os.mkdir(tc_path)
+        except OSError:
+            print ("Creation of the directory %s failed is already created" % tc_path)
+        else:
+            print ("Successfully created the directory %s " % tc_path)
+
+
+
+        if parameters_dict['Control_Parameters']['generate_cubes'] and sources != []:
             #Creation of the listobs
             if not os.path.exists(new_path+'/log.txt'):
                 list(mySDM,new_path)
 
             header,foot,f_header,f_foot=lines(new_path)
-
             temp=np.genfromtxt(new_path+"/log.txt",skip_header=header,skip_footer=foot,usecols=(0))
-
             print('Spw to check ', temp)
-
             #Create freq vs amp txt files
-
             plots=glob.glob(new_path+'/*.txt*')
             if len(plots)<2:
                 ploting(f,temp,new_path)
 
-            #Function to find acording to the species
-
-            sel_file= parameters_dict['Frequency_File']['molecule']
-            energy_cut = float(parameters_dict['Frequency_File']['upper_energy'])
-
             array_spws=create_freq(sel_file,energy_cut,new_path)
             if array_spws != []:
-                #Creates a new folder for cubes that are going to be created. 
-                try:  
-                    tc_path=path_analysis+'Output/'+mySDM_Folder+'/'+sel_file[:-4]+'/'
-                    os.mkdir(tc_path)
-                except OSError:
-                    print ("Creation of the directory %s failed is already created" % tc_path)
-                else:  
-                    print ("Successfully created the directory %s " % tc_path)
-                
                 #Create images of the previous findings
                 images_cube=create_img(array_spws,f,mySDM,tc_path)
                 print(images_cube)
-            else:
-                print("The MS file does not contain any match with the lines listed in file %s" % sel_file)
-                next
-    
-    #Stacking detected lines
-    if parameters_dict['Control_Parameters']['stack_cubes']:
-        temp=[]
-        temp2=[]
-        for cube in images_cube:
-            stats=imstat(imagename=tc_path+cube,  box='50,50,300,300', axes=[0,1])
-            if len(stats['rms'])>256:
-                images_cube.remove(cube)
-                print('Removed from the stacking %s' %cube)
-            else: 
-             temp.append(int(cube[cube.find('(')+1:cube.find(')')]))
-        temp.sort(reverse=True)
-        temp=[str(x) for x in temp]
-        for n in temp:
-            for name in images_cube:
-                if n in name:
-                    temp2.append(name)
-        images_cube=temp2
-        print( images_cube)
-        images_cube.append(tc_path)
+        else:
+            print("The MS file does not contain any match with the lines listed in file %s" % sel_file)
+            next
 
-        #Stacking Cubes
-        execfile("stacking_module.py",globals())
-        stack(images_cube)      
+        #Stacking detected lines
+
+        if parameters_dict['Control_Parameters']['stack_cubes']:
+            if images_cube == []:
+                images_cube  = glob.glob1(tc_path , '*.image')
+            print(images_cube)
+
+            images_cube = sorted(images_cube)
+            #Stacking Cubes
+            execfile("stacking_module.py",globals())
+            stack(images_cube,tc_path)      
 
 main()
 

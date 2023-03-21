@@ -18,7 +18,7 @@ with open ('parameters.txt', 'r') as myfile:
             parameters_dict[group]={}
 
         elif not myline.startswith('#'):
-            print(myline.strip('\n'))
+            #print(myline.strip('\n'))
             key,val = myline.strip('\n').replace(' ', '').split('=')
             if "[" in val:
                 ls = val.strip('[]').replace('"', '').replace(' ', '').split(',')
@@ -137,14 +137,13 @@ def create_freq(sel_mole, energy_cut,new_path):
     os.chdir(new_path)
     files = glob.glob("*.txt")
     os.chdir(path_analysis)
-    Select=sel_mole
     print(files)
     for spw in files:  # Extract the frequencies
          if os.stat(new_path+'/'+spw).st_size > 100:
              i=np.genfromtxt(new_path+'/'+spw,comments='#',usecols=(0))
              min_v=np.amin(i)
              max_v=np.amax(i)
-             with open(path_analysis+'Species/'+Select) as Species_file:
+             with open(path_analysis+'Species/'+sel_mole) as Species_file:
                  Reader=csv.reader(Species_file,delimiter='\t')
                  next(Reader)#Skip the Blank line
                  next(Reader)#Skip the Header
@@ -262,92 +261,90 @@ global new_path
 
 def main():
     global mySDM
-    if parameters_dict['Control_Parameters']['generate_cubes']:
-        for i in sources:
-            mySDM = i
-            mySDM_Folder=str(mySDM[0:-3])  
+    for i in sources:
+        mySDM = i
+        mySDM_Folder=str(mySDM[0:-3])  
 
-            #Create Folder for the plotms Outputs
+        #Create Folder for the plotms Outputs
 
-            try:  
-                new_path=path_analysis+'Output/'+mySDM_Folder
-                os.mkdir(new_path)
-            except OSError:  
-                print ("Creation of the directory %s failed is already created" % new_path)
-            else:  
-                print ("Successfully created the directory %s " % new_path)
+        try:  
+            new_path=path_analysis+'Output/'+mySDM_Folder
+            os.mkdir(new_path)
+        except OSError:  
+            print ("Creation of the directory %s failed is already created" % new_path)
+        else:  
+            print ("Successfully created the directory %s " % new_path)
+        sel_file= parameters_dict['Frequency_File']['molecule'] 
+        energy_cut = float(parameters_dict['Frequency_File']['upper_energy'])
+        
+        #Creates a new folder for cubes that are going to be created.
+        
+        try:  
+            tc_path=path_analysis+'Output/'+mySDM_Folder+'/'+sel_file[:-4]+'/'
+            os.mkdir(tc_path)
+        except OSError:
+            print ("Creation of the directory %s failed is already created" % tc_path)
+        else: 
+            print ("Successfully created the directory %s " % tc_path)
 
+
+        if parameters_dict['Control_Parameters']['generate_cubes']:
             #Creation of the listobs
             if not os.path.exists(new_path+'/log.txt'):
                 list(mySDM,new_path)
-
             header,foot,f_header,f_foot=lines(new_path)
-
             temp=np.genfromtxt(new_path+"/log.txt",skip_header=header,skip_footer=foot,usecols=(0))
-
             print('Spw to check ', temp)
-
             #Create freq vs amp txt files
 
             plots=glob.glob(new_path+'/*.txt*')
             if len(plots)<2:
                 ploting(f,temp,new_path)
 
-            #Function to find acording to the species
-
-            sel_file= parameters_dict['Frequency_File']['molecule']  #select_file() #'CH3OH.tsv'#'OH.tsv'# 'OH.tsv' 
-            energy_cut = float(parameters_dict['Frequency_File']['upper_energy'])
+            #Function to find acording to the specie            
 
             array_spws=create_freq(sel_file,energy_cut,new_path)
             if array_spws !=[]:
-                 #Creates a new folder for cubes that are going to be created.
-                tc_path=''
-                try:  
-                    tc_path=path_analysis+'Output/'+mySDM_Folder+'/'+sel_file[:-4]+'/'
-                    os.mkdir(tc_path)
-                except OSError:
-                    print ("Creation of the directory %s failed is already created" % tc_path)
-                else: 
-                    print ("Successfully created the directory %s " % tc_path)
-
                 #Create images of the previous findings 
-
-                images_cube=create_img(array_spws,f,mySDM,tc_path)
-
+                #images_cube=create_img(array_spws,f,mySDM,tc_path)
+                images_cube = []
             else:
                print("The MS file does not contain any match with the lines listed in file %s" % sel_file)
                next
 
-
         #Stacking detected lines
+        
+        if parameters_dict['Control_Parameters']['stack_cubes']:
+            print('stack',tc_path)
+            images_cube  = glob.glob1(tc_path ,'*.image')
+            if images_cube == []:
+                images_cube  = glob.glob1(tc_path , '*.image')
+            print(images_cube)
+            '''
+            temp  =[]
+            temp2 =[]
+            for cube in images_cube:
+                stats=imstat(imagename=tc_path+cube,  box='50,50,300,300', axes=[0,1])
+                if len(stats['rms'])>256:
+                    images_cube.remove(cube)
+                    print('Removed from the stacking %s' %cube)
+                else: 
+                    temp.append(cube[cube.find('(')+1:cube.find(')')])
+                    #temp.append(int(filter(str.isdigit,cube))) 
+            temp.sort(reverse=True)
+            temp=[str(x) for x in temp]
+            for n in temp:
+                for name in images_cube:
+                    if n in name:
+                        temp2.append(name)
+                images_cube=temp2
+                print( images_cube)
+            '''
+            images_cube = sorted(images_cube)
+            #Stacking Cubes
+            execfile("stacking_module.py",globals())
+            #print images_cube
+            stack(images_cube,tc_path)
 
-    if parameters_dict['Control_Parameters']['stack_cubes']:
-        temp=[]
-        temp2=[]
-        for cube in images_cube:
-            stats=imstat(imagename=tc_path+cube,  box='50,50,300,300', axes=[0,1])
-            if len(stats['rms'])>256:
-                images_cube.remove(cube)
-                print('Removed from the stacking %s' %cube)
-            else: 
-                temp.append(cube[cube.find('(')+1:cube.find(')')])
-                #temp.append(int(filter(str.isdigit,cube))) 
-        temp.sort(reverse=True)
-        temp=[str(x) for x in temp]
-        for n in temp:
-            for name in images_cube:
-                if n in name:
-                    temp2.append(name)
-        images_cube=temp2
-        print( images_cube)
-        images_cube.append(tc_path)
-
-        #Stacking Cubes
-        execfile("stacking_module.py",globals())
-        #print images_cube
-        stack(images_cube)
-
-
-if __name__ == '__main__':
-    main()
+main()
 
