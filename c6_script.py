@@ -140,7 +140,7 @@ def create_freq(sel_mole, energy_cut,new_path):
                      specie=row[0]
                      quatum_trans=row[3]
                      energy=float(row[7])
-                     if min_v <= rest_freq <= max_v and energy<=energy_cut :
+                     if min_v <= rest_freq <= max_v and energy<=energy_cut:
                          print("SPW: {} Quatum {} Rest_freq: {} GHz Energy {} K".format(spw,quatum_trans,rest_freq,energy))
                          spw_found.append([spw,min,max,1,specie,quatum_trans,rest_freq])
                          spw_n=spw[3:-4]
