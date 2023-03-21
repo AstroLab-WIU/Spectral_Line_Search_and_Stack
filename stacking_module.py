@@ -20,40 +20,23 @@ def chans_rm_continuum(cube_input,new_path):
         rms_std=a.std()
         flux_mean=b.mean()
         flux_std= b.std()
-        lower_lim=rms_mean-3*rms_std
-        upper_lim=rms_mean+3*rms_std
-        
-        print( "Mean {0:2.3e} Std { 1:2.3e} Lower limit {2:2.3e} Upper Limit {3:2.3e} rms {4:2.3e}".format(flux_mean,flux_std,lower_lim,upper_lim,rms_mean))
+        lower_lim=rms_mean-rms_std
+        upper_lim=rms_mean+rms_std
         channel_conti=''
         num=len(stats['rms'])
         channel_join = ''
         for i in range(num):
-            chan_stats=imstat(imagename=new_path+cube,  box='50,50,300,300',axes=[0,1] ,chans=str(i))
-            if len(chan_stats['rms'])==0:
+            chan_stats = stats['rms'][i]
+            if chan_stats == 0.0:
                 pass
                 chans=i+1
             else:
-                #print("Flux {0:3.3e}".format(chan_stats['flux'][0]))
-                print("Lower Lim {0:2.3e} , Upper Lim {1:2.3e} RMS {2:2.3e}".format(lower_lim,upper_lim,chan_stats['rms'][0]))
-                print("RMS {0:3.3e} Channel {1:1d}".format(chan_stats['rms'][0],i))
-                #if chan_stats['flux'][0]>lower_lim and chan_stats['flux'][0]<upper_lim:
-                    #EA: I would expect a channel
-                    #with a flux between the lower and
-                    #upper limit to be included in the
-                    #continuum substraction.
-                    # It seems to me as a mistake, so
-                    # I commented it out and changed the
-                    # if statement, also it makes more sense
-                    #to use the RMS instead of the flux density
-                    #to deside if the channel is ok for cont subtraction.
-                if chan_stats['rms'][0]>lower_lim and chan_stats['rms'][0]<upper_lim:
-#                    pass
-#                else:
+                #print("Lower Lim {0:2.3e} , Upper Lim {1:2.3e} RMS {2:2.3e}".format(lower_lim,upper_lim,chan_stats))
+                if chan_stats > lower_lim and chan_stats < upper_lim:
                     channs_end=i-1
                     #if chans<channs_end:
-                    #channel_conti =str(chans)+'~'+str(channs_end) #EA, no need to include ranges, we can simply include the list of channels that are ok
                     channel_conti = str(i) #EA
-                    print( channel_conti)
+                    #print( channel_conti)
                     #print str(i)+" Out limits" 
                     chans=i+1
                     array_channel.append(channel_conti)
@@ -61,12 +44,11 @@ def chans_rm_continuum(cube_input,new_path):
         channels_use.append(channel_join)       
     return channels_use
 
-def stack(cube_input):                
-    new_path=cube_input[-1]
-    channels =chans_rm_continuum(cube_input)
-    print('EA channels check: ',channels) #EA
-    
- 
+def stack(cube_input,new_path):                    
+    if os.path.exists(new_path + "stacked_cube.image"):
+        return "Already Stacked"
+    channels =chans_rm_continuum(cube_input,new_path)
+    print(channels)
     ## Remove continuum: this is better if done in the UV plane before tclean
     cube =[]
     for i in range(len(cube_input)):
@@ -85,7 +67,6 @@ def stack(cube_input):
         else:
             linefile = new_path+cube_input[i]+'.NC' 
             cube.append(linefile) 
-    print(len(cube))
     if len(cube) == 1:
         raise SystemExit
 
@@ -135,7 +116,7 @@ def stack(cube_input):
     for i in range(len(imstat_cube)):
         a =np.array(imstat_cube[i]['rms'])
         print('RMS of  '+cube_to_stack[i]+' is %1.2e Jy/b' % a.mean())
-
+'''
 
 def export_image(img_name):
     img=''
@@ -221,3 +202,4 @@ def sub_stacked(image_name):
         region='regions/'+imagename+'.reg',
         overwrite=True )
     os.chdir(path_analysis)
+'''
