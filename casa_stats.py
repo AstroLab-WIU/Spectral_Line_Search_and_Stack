@@ -1,6 +1,5 @@
 import numpy as np
 import glob,os
-import pandas as pd
 
 file_name = 'Images_CASA_Stats.txt'
 image_list = ['source','image','b_minor','b_major','b_angle'] #File_Header
