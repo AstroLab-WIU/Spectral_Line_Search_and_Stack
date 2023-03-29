@@ -48,7 +48,7 @@ def stack(cube_input,new_path):
     if os.path.exists(new_path + "stacked_cube.image"):
         return "Already Stacked"
     channels =chans_rm_continuum(cube_input,new_path)
-    print(channels)
+
     ## Remove continuum: this is better if done in the UV plane before tclean
     cube =[]
     for i in range(len(cube_input)):
@@ -70,20 +70,21 @@ def stack(cube_input,new_path):
     if len(cube) == 1:
         raise SystemExit
 
-    #regrid spectrum, to be able to average them.
+    ## Regrid spectrum, to be able to average them.
+
     cube_to_stack = [cube[0]]
     for i in range(len(cube)-1):
-        print(cube[0],cube[i+1])
-        output = imagename +'.imregrid'
+        output = cube[i+1] +'.imregrid'
         imregrid(
         imagename = cube[i+1]
         ,template = cube[0]
-        ,output = imagename +'.imregrid'
+        ,output =  cube[i+1] +'.imregrid'
         #axes=3
         ,asvelocity = True
         ,overwrite = True)
         cube_to_stack.append(output)
-    # Get RMS of the cubes
+
+    ## Get RMS of the cubes
     imstat_cube = []
     for i in range(len(cube_to_stack)):
         imstat_cube.append(imstat(cube_to_stack[i], box='50,50,300,300'))
@@ -98,7 +99,7 @@ def stack(cube_input,new_path):
     weights = weights/weight_total
     print('Weights: ',weights)
     
-    #Creates the new stacked cube using the previous weights
+    ## Creates the new stacked cube using the previous weights
 
     stacked_image = new_path+'stacked_cube.image'
 
@@ -113,7 +114,8 @@ def stack(cube_input,new_path):
     ,mode = 'evalexpr'
     ,outfile = stacked_image
     ,expr = ex )
-    #Print the RMS of all the cubes
+
+    ## Print the RMS of all the cubes
     imstat_cube.append(imstat(new_path+'stacked_cube.image', box='50,50,300,300'))
     cube_to_stack.append("stacked_cube.image")
     for i in range(len(imstat_cube)):
