@@ -272,7 +272,13 @@ def main():
             images_cube = sorted(images_cube)
             #Stacking Cubes
             execfile("stacking_module.py",globals())
-            stack(images_cube,tc_path)      
+            stack(images_cube,tc_path)  
+
+
+        if parameters_dict['Control_Parameters']['generate_stats']:
+            print(tc_path)
+            execfile("casa_stats.py",globals())
+            calc_beam_stats(tc_path)
 
 main()
 

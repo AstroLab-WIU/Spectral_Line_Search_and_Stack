@@ -23,8 +23,10 @@ with open ('parameters.txt', 'r') as myfile:
             if "[" in val:
                 ls = val.strip('[]').replace('"', '').replace(' ', '').split(',')
                 val =ls
-            if val =="True" or val == "False":
-                val = bool(val)
+            if val =="True":
+                val= True
+            if val == "False":
+                val = False
             mylines.append(( key,val ))
             parameters_dict[group].update(mylines )
 
@@ -313,38 +315,24 @@ def main():
                next
 
         #Stacking detected lines
-        
+        print(parameters_dict['Control_Parameters'])
         if parameters_dict['Control_Parameters']['stack_cubes']:
-            print('stack',tc_path)
-            images_cube  = glob.glob1(tc_path ,'*.image')
+            #print('stack',tc_path)
+            #images_cube  = glob.glob1(tc_path ,'*.image')
             if images_cube == []:
                 images_cube  = glob.glob1(tc_path , '*.image')
             print(images_cube)
-            '''
-            temp  =[]
-            temp2 =[]
-            for cube in images_cube:
-                stats=imstat(imagename=tc_path+cube,  box='50,50,300,300', axes=[0,1])
-                if len(stats['rms'])>256:
-                    images_cube.remove(cube)
-                    print('Removed from the stacking %s' %cube)
-                else: 
-                    temp.append(cube[cube.find('(')+1:cube.find(')')])
-                    #temp.append(int(filter(str.isdigit,cube))) 
-            temp.sort(reverse=True)
-            temp=[str(x) for x in temp]
-            for n in temp:
-                for name in images_cube:
-                    if n in name:
-                        temp2.append(name)
-                images_cube=temp2
-                print( images_cube)
-            '''
+            
             images_cube = sorted(images_cube)
+            
             #Stacking Cubes
             execfile("stacking_module.py",globals())
             #print images_cube
             stack(images_cube,tc_path)
+
+        if parameters_dict['Control_Parameters']['generate_stats']:
+            execfile("casa_stats.py",globals())
+            calc_beam_stats(tc_path)
 
 main()
 
