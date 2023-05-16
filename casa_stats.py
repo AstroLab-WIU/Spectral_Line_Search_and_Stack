@@ -2,7 +2,7 @@ import numpy as np
 import glob,os
 
 file_name = 'Images_CASA_Stats.txt'
-image_list = [['source','image','b_minor','b_major','b_angle']] #File_Header
+image_list = [['source','image','b_minor (arcsec)','b_major (arcsec)','b_angle (rad)','rms (Jy / Beam)','mean (Jy / Beam)']] #File_Header
 
 def calc_beam_stats(folder):
     try:
@@ -15,7 +15,11 @@ def calc_beam_stats(folder):
             beam_angle = head['beampa']['value']
             folder_path = os.path.basename(os.path.dirname(folder +'/'))
             image_path = os.path.basename(os.path.dirname(img + '/'))
-            image_list.append([folder_path,image_path,beam_minor,beam_major,beam_angle])
+
+            stat=imstat(img ,box='50,50,300,300')
+            rms_value = stat['rms'][0]
+            mean_value = stat['mean'][0]
+            image_list.append([folder_path,image_path,beam_minor,beam_major,beam_angle,rms_value,mean_value])
     except OSError as error:
         pass
     print(image_list)
